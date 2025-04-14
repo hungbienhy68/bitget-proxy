@@ -14,6 +14,7 @@ app.get("/", (req, res) => {
 app.get("/api/bitget-price", async (req, res) => {
   try {
     const { fiat = "VND", side = "buy" } = req.query;
+
     const response = await axios.get(
       "https://api.bitget.com/api/p2p/v1/merchant/adv/search",
       {
@@ -26,27 +27,21 @@ app.get("/api/bitget-price", async (req, res) => {
           fiat,
           side,
           tokenId: "USDT",
-          payTypes: [],
-          publisherType: null,
-          merchantType: "",
           page: 1,
           rows: 1,
         },
       }
     );
 
-    const price = response.data.data[0]?.price;
-    if (!price) {
+    const data = response.data.data;
+    if (!data || data.length === 0) {
       return res.status(500).json({ error: "Không tìm thấy giá USDT" });
     }
 
-    res.json({ price });
+    res.json({ price: data[0].price });
   } catch (error) {
     console.error("Lỗi gọi API Bitget:", error.message);
-    res.status(500).json({
-      error: "Lỗi gọi API Bitget",
-      detail: error.message,
-    });
+    res.status(500).json({ error: "Lỗi gọi API Bitget", detail: error.message });
   }
 });
 
